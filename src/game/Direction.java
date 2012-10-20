@@ -16,24 +16,4 @@ public enum Direction {
 		return row;
 	}
 	
-	public Direction getOpposite(){
-		switch (this){
-			case NORTH:
-				return SOUTH;
-			case SOUTH:
-				return NORTH;
-			case EAST:
-				return WEST;
-			case WEST:
-				return EAST;
-			case NORTHEAST:
-				return SOUTHWEST;
-			case SOUTHWEST:
-				return NORTHEAST;
-			case SOUTHEAST:
-				return NORTHWEST;
-			default:
-				return SOUTHEAST;
-		}
-	}
 }

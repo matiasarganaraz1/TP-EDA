@@ -1,17 +1,16 @@
 package game;
 
-import java.awt.Point;
 
-public enum Chip {
+public enum Blob {
 	PLAYER1,PLAYER2, EMPTY;
 	
-	public Chip getOpposite(){
+	public Blob getOpposite(){
 		if(this==PLAYER1){
-			return Chip.PLAYER2;
+			return Blob.PLAYER2;
 		}else if(this==PLAYER2){
-			return Chip.PLAYER1;
+			return Blob.PLAYER1;
 		}
-		return Chip.EMPTY;
+		return Blob.EMPTY;
 	}
 	
 	@Override
