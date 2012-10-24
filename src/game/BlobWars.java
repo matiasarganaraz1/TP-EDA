@@ -1,33 +1,39 @@
 package game;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import ai.Ai;
 
 
 //import AI.MiniMaxTree;
 
 public class BlobWars {
-	private Board board,undo;
-	private boolean pruned, timed;
-	private int level;
+	private Board board;
+	private Deque<BoardState> undo;
+//	private boolean pruned, timed;
+//	private int level;
 	private int blobsCount;
 	private GameListener listener;
 	private boolean playerCanMove;
 	private boolean playerTurn;
+	private boolean hasEnded = false;
 	private Point selectedBlob;
-	
+
 	public BlobWars(GameListener listener,int level, boolean pruned, boolean timed){
 		this.listener=listener;
-		this.timed=timed;
-		this.pruned=pruned;
-		this.level=level;
+//		this.timed=timed;
+//		this.pruned=pruned;
+//		this.level=level;
 		newGame();
 	}
-	
-	private void endOfGame() {
+
+	public void endOfGame() {
+		hasEnded=true;
 		int playerCount=board.countBlobs(Blob.PLAYER1);
 		int computerCount=board.countBlobs(Blob.PLAYER2);
-		listener.endOfGame(playerCount-computerCount);
+		listener.endOfGame(playerCount,computerCount);
 	}
+
 	public void endOfGame(Blob blob){
 		for(int i=0; i<Board.SIZE; i++){
 			for(int j=0; j<Board.SIZE; j++){
@@ -37,85 +43,108 @@ public class BlobWars {
 		}
 		endOfGame();
 	}
-	
-	public void computerTurn() {
-		Movement movement = Ai.getNextMove(board);
-		if(movement == null)
-			endOfGame(Blob.PLAYER2);
-		movement.makeMovement(this);
-		playerTurn=true;
+
+	public int countBlobs(Blob blob){
+		return board.countBlobs(blob);
 	}
-//		MiniMaxTree tree = new MiniMaxTree(level, board, pruned, timed, false, MiniMaxTree.CPUTURN);
-//		Position pos = tree.getNextMove();
-//		boolean cpuCanMove = pos != null;
-//		if (cpuCanMove) {
-//			board=board.putTile(pos.getRow(), pos.getCol(), Tile.PLAYER2);
-//			tileCount++;
-//		}
-//		
-//		if(!cpuCanMove&&!playerCanMove || tileCount>=Board.SIZE*Board.SIZE){
-//			endOfGame();
-//			return;
-//		}
-//		
-//		playerTurn=true;
-//		playerCanMove=board.playerHasMoves();
-//		if(!playerCanMove){
-//			if(cpuCanMove){
-//				listener.enablePass();
-//			}
-//			else{
-//				endOfGame();
-//			}
-//		}
-//	}
-	
+
+	public Movement computerSelectMovement() {
+		Movement movement = Ai.getNextMove(board);
+		if(movement == null){
+			endOfGame(Blob.PLAYER2);
+			return null;
+		}
+		selectedBlob = movement.from;
+		return movement;
+	}
+
+	public void computerMakeMovement(Movement movement){
+		movement.makeMovement(this);
+		selectedBlob = null;
+		playerTurn=true;
+		if(!playerHasMoves())
+			if(countBlobs(Blob.PLAYER1)==0 || blobsCount() == Board.SIZE*Board.SIZE)
+				endOfGame();
+			else
+				listener.enablePass();
+	}
+
+	//		MiniMaxTree tree = new MiniMaxTree(level, board, pruned, timed, false, MiniMaxTree.CPUTURN);
+	//		Position pos = tree.getNextMove();
+	//		boolean cpuCanMove = pos != null;
+	//		if (cpuCanMove) {
+	//			board=board.putTile(pos.getRow(), pos.getCol(), Tile.PLAYER2);
+	//			tileCount++;
+	//		}
+	//		
+	//		if(!cpuCanMove&&!playerCanMove || tileCount>=Board.SIZE*Board.SIZE){
+	//			endOfGame();
+	//			return;
+	//		}
+	//		
+	//		playerTurn=true;
+	//		playerCanMove=board.playerHasMoves();
+	//		if(!playerCanMove){
+	//			if(cpuCanMove){
+	//				listener.enablePass();
+	//			}
+	//			else{
+	//				endOfGame();
+	//			}
+	//		}
+	//	}
+
 	public boolean playerTurn(int row, int col){
-		System.out.println("BlobCount: "+ blobsCount);
 		if(playerTurn && playerCanMove){
 			Point aux = board.selectBlob(row, col);
 			if(selectedBlob == null || aux != null){
 				selectedBlob = aux;
 				return false;
 			}
-			undo = board.clone();
+			undo.push(new BoardState(board.clone(),blobsCount));
+			listener.enableUndo();
 			double d = selectedBlob.distanceTo(new Point(row, col));
-			System.out.println("distancia: " + d);
 			if(d > 0  &&  d < 2.9){
 				if(((d < 1.5) ? cloneBlob(row, col, Blob.PLAYER1) : board.moveBlob(selectedBlob, row, col, Blob.PLAYER1))){
 					selectedBlob=null;
+					playerTurn = false;
+					if(countBlobs(Blob.PLAYER2) == 0) {
+						hasEnded = true;
+						endOfGame();
+					}
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	public boolean cloneBlob(int row, int col, Blob blob){
 		boolean b = board.cloneBlob(row, col, blob);
 		if(b)
 			blobsCount++;
 		return b;
 	}
-	
+
 	public boolean moveBlob(Point from, int row, int col, Blob blob){
-		boolean b = board.moveBlob(from, row, col, blob);
-		if(b)
-			blobsCount++;
-		return b;
+		return board.moveBlob(from, row, col, blob);
 	}
-	
+
 	public Board getBoard() {
 		return board;
 	}
-	
+
 	public void newGame(){
 		System.out.println("NEW GAME");
 		board = new Board();
-		undo = board.clone();
+		if(undo!=null && !undo.isEmpty()){
+			listener.disableUndo();
+		}
+		undo = new LinkedList<BoardState>();
 		blobsCount = 4;
 		playerTurn=true;
 		playerCanMove=true;
+		hasEnded = false;
 	}
 
 	public Blob print(int row, int col) {
@@ -125,15 +154,28 @@ public class BlobWars {
 	public Point getSelectedBlob() {
 		return selectedBlob;
 	}
-	
+
 	public void undo(){
-		board = undo;
+		BoardState prevBoard = undo.pop();
+		board = prevBoard.getBoard();
+		blobsCount = prevBoard.getBlobCount();
+		hasEnded = false;
+		playerTurn = true;
+		selectedBlob = null;
+		if(undo.isEmpty())
+			listener.disableUndo();
 	}
 
 	public boolean playerHasMoves() {
-		double d = Math.random();
-		return (d>0.5)?true : false;
+		return board.playerHasMoves();
 	}
-	
-	
+
+	public boolean hasEnded() {
+		return hasEnded;
+	}
+
+	public int blobsCount(){
+		return blobsCount;
+	}
+
 }

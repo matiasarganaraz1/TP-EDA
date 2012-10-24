@@ -1,15 +1,13 @@
 package gui;
 
 import game.Blob;
-import game.Board;
 import game.GameListener;
 import game.BlobWars;
+import game.Movement;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -31,41 +29,60 @@ public class Window extends JFrame {
 	private final int windowHeight = 33;
 	private GamePanel gPanel;
 	private BlobWars game;
-	private JButton undoButton, passButton;
+	private JButton undoButton, passButton, newGameButton;
+	private JLabel status, undoLabel, passLabel, newGameLabel;
 	private Menu menu;
-	private JLabel status;
 	private JPanel container;
+	private final String playerTurn="               Your turn!",computerTurn = "The computer is thinking...";
 
 	public Window(int level, boolean pruned, boolean timed){
 		super("BlobWars");
 		GameListener listener=new GameListener(){
-				public void endOfGame(int score) {
-					JFrame frame = new JFrame("Game Over");
-					frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-					frame.setLayout(new BorderLayout());
-					ImageFrame panel;
-					try {
-						if(score<0){
-							panel = new ImageFrame(ImageUtils.loadImage("./resources/YOULOOSE.png"));
-						}else if(score>0){
-							panel = new ImageFrame(ImageUtils.loadImage("./resources/youWon.png"));
-							panel.setPreferredSize(new Dimension(552,240));
-						}else{
-							panel = new ImageFrame(ImageUtils.loadImage("./resources/drawgame.png"));
-							panel.setPreferredSize(new Dimension(425,352));
-						}
-						frame.getContentPane().add(panel, BorderLayout.CENTER);	
-						frame.setVisible(true);
-						frame.pack();
-					} catch (IOException e) {
-						JOptionPane.showMessageDialog(Window.this, "There's has been an error while loading the images");
-					}
-//					Window.this.passButton.setEnabled(false);
+				public void endOfGame(int playerCount, int computerCount) {
+					int score = playerCount - computerCount;
+					passButton.setEnabled(false);
+//					try {
+//						Thread.sleep(100);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 					Window.this.repaint();
+
+						if(score<0){
+							JOptionPane.showMessageDialog(Window.this,"Perdiste");
+							status.setText("Perdiste");
+//	                		JOptionPane.showMessageDialog(Window.this, null, "Perdiste", 0, new ImageIcon("./resources/YOULOOSE.png"));
+						}else if(score>0){
+							JOptionPane.showMessageDialog(Window.this,"Ganaste");
+							status.setText("Ganaste");
+//							JOptionPane.showMessageDialog(Window.this, null, "Ganaste", 0, new ImageIcon("./resources/youWon.png"));
+//							
+//							panel.setPreferredSize(new Dimension(552,240));
+						}else{
+							JOptionPane.showMessageDialog(Window.this,"Empate");
+							status.setText("Empate");
+//							panel = new ImageFrame(ImageUtils.loadImage("./resources/drawgame.png"));
+//							panel.setPreferredSize(new Dimension(425,352));
+						}
+						JOptionPane.showMessageDialog(Window.this,"Player:           Computer:\n    "+playerCount+"                      "+computerCount);
+						status.setText(null);
+//					Window.this.repaint();
 				}
 			
 				public void enablePass() {
+					passButton.setEnabled(true);
+					passButton.repaint();
+				}
+				
+				public void enableUndo() {
 					undoButton.setEnabled(true);
+					undoLabel.setForeground(Color.black);
+					undoButton.repaint();
+				}
+				
+				public void disableUndo() {
+					undoButton.setEnabled(false);
 					undoButton.repaint();
 				}
 			};
@@ -91,7 +108,7 @@ public class Window extends JFrame {
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(Window.this, "There's has been an error while loading the images");
 		}
-		background.setPreferredSize(new Dimension(572,607));
+		
 		gPanel = new GamePanel(game, this);
 		setPreferredSize(new Dimension(background.getWidth() + windowWidth, background.getHeight() + 20 + windowHeight));
 		background.add(gPanel);
@@ -99,43 +116,70 @@ public class Window extends JFrame {
 		container.add(background);
 		
 		JPanel info = new ImagePanel(null);
-		status=new JLabel("Your turn!");
+		status=new JLabel(playerTurn);
 		
-		undoButton=new JButton("Undo");
+		//undo
+		undoLabel = new JLabel("UNDO");
+		undoLabel.setForeground(Color.DARK_GRAY);
+		undoLabel.setFont(new Font("Arial", Font.BOLD, 20));
+		undoButton = new JButton(new ImageIcon("./resources/button.png"));
+		undoButton.setEnabled(false);
+		undoButton.setOpaque(false);
+		undoButton.setBorderPainted(false);
+		undoButton.setBackground(new Color(123,123,123,0));
 		undoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-//				Window.this.passButton.setEnabled(false);
-//				Window.this.game.computerTurn();
+				passButton.setEnabled(false);
 				Window.this.game.undo();
+				status.setText(playerTurn);
 				repaint();
 			}
 		});
 		
-		passButton=new JButton("Pass");
+		passButton = new JButton(new ImageIcon("./resources/button.png"));
+		passButton.setEnabled(false);
+		passButton.setOpaque(false);
+		passButton.setBorderPainted(false);
+		passButton.setBackground(new Color(123,123,123,0));
 		passButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent arg0) {				
 				Window.this.game.endOfGame(Blob.PLAYER1);
 				repaint();
 			}
 		});
-		passButton.setEnabled(false);
 		
+		newGameButton = new JButton(new ImageIcon("./resources/button.png"));
+		newGameButton.setOpaque(false);
+		newGameButton.setBorderPainted(false);
+		newGameButton.setBackground(new Color(123,123,123,0));
+		newGameButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Window.this.game.newGame();
+				repaint();
+			}
+		});
 		
 		info.setLayout(null);
+		info.add(undoLabel);
 		info.add(undoButton);
-//		info.add(status);
+		info.add(status);
 		info.add(passButton);
-		
-		undoButton.setBounds(90,10,80,20);
-		status.setBounds(5, 5, 80, 15);
-		status.setBackground(Color.blue);
-		passButton.setBounds(180,10,80,20);
+		info.add(newGameButton);
+		container.paintImmediately(container.getBounds());
+		status.setBounds(5, 10, 150, 15);
+		newGameButton.setBounds(160, 0, 115, 35);
+		undoButton.setBounds(275,0,115,35);
+		undoLabel.setBounds(303, 1, 115, 35);
+		passButton.setBounds(390,0,115,35);
+//		status.setOpaque(true);
+		status.setForeground(Color.white);
+//		status.setBackground(new Color(100,100,100,124));
 		info.setBounds(31, 540, background.getWidth(), 30);
-		info.setBackground(Color.RED);
-		background.add(info);
 		
+		background.add(info);
 		background.setBounds(0, 25, background.getWidth(), background.getHeight());
 		menu.setBounds(0,0,background.getWidth(),25);
 		gPanel.setBounds(31, 26, 512, 512);
@@ -148,17 +192,22 @@ public class Window extends JFrame {
 	}
 	
 	public void play(int row, int col){
-		if(!game.playerHasMoves())
-			passButton.setEnabled(true);
-		boolean b = game.playerTurn(row, col);
-		System.out.println("b: "+ b);
-		container.paintImmediately(container.getBounds());
-		if(b){
-			status.setText("The computer is thinking...");
+		if( !game.hasEnded() && game.playerTurn(row, col) && !game.hasEnded()) {
+			status.setText(computerTurn);
 			
-			game.computerTurn();
-			status.setText("Your turn");
+			Movement mov = game.computerSelectMovement();
 			container.paintImmediately(container.getBounds());
+			try {
+				Thread.sleep(700);
+			} catch (InterruptedException e) {
+				System.out.println("ERROR");
+			}
+			if(mov == null)
+				status.setText("Computer can't move and pass");
+			else {
+				game.computerMakeMovement(mov);
+				status.setText(playerTurn);
+			}
 		}
 		container.paintImmediately(container.getBounds());
 	}

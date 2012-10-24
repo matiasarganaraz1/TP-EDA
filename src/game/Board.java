@@ -99,12 +99,13 @@ public class Board implements Cloneable {
 	}
 
 	public boolean playerHasMoves() {
+		Displacement[][] displacements = {D1.values(), D2.values()};
 		for(int i=0; i < Board.SIZE; i++){
 			for(int j=0; j<Board.SIZE;j++){
 				if(board[i][j] == Blob.PLAYER1){
-					for(int k=1;k<=2;k++){
-						for (Direction dir : Direction.values()) {
-							Point to = new Point(i + dir.getRow()*k, j + dir.getCol()*k);
+					for(Displacement[] disps:displacements){
+						for(Displacement d: disps){
+							Point to = new Point(i + d.getRow(), j + d.getCol());
 							if(contains(to) && getBlob(to) == Blob.EMPTY)
 								return true;
 						}
@@ -167,7 +168,11 @@ public class Board implements Cloneable {
 
 
 	public boolean contains(Point to) {
-		return to.getX()>=0 && to.getX()<SIZE && to.getY()>=0 && to.getY()<SIZE; 
+		return contains(to.getX(), to.getY()); 
+	}
+
+	public boolean contains(int row, int col) {
+		return row >= 0 && row < SIZE && col >=0 && col < SIZE;
 	}
 
 }

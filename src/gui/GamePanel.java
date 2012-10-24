@@ -3,9 +3,11 @@ package gui;
 import game.Board;
 import game.BlobWars;
 import game.Blob;
+import game.D1;
+import game.D2;
+import game.Displacement;
 import game.Point;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -43,13 +45,10 @@ public class GamePanel extends JPanel {
 			JOptionPane.showMessageDialog(window, "An error has occurred while uploading the images");
 			System.exit(0);
 		}
-		setPreferredSize(new Dimension(Board.SIZE * BLOB_SIZE, Board.SIZE*BLOB_SIZE));
-		setBackground(new Color(126,136,125));
+		setPreferredSize(new Dimension(Board.SIZE * BLOB_SIZE, Board.SIZE * BLOB_SIZE));
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent m) {
-				System.out.println("X: "+ m.getX());
-				System.out.println("Y: "+ m.getY());
 				int row=m.getY()/BLOB_SIZE;
 				int col=m.getX()/BLOB_SIZE;
 				GamePanel.this.window.play(row,col);
@@ -72,41 +71,41 @@ public class GamePanel extends JPanel {
 	private void drawPosiblesMoves(Graphics g) {
 		Point p=game.getSelectedBlob();
 		if(p != null){
-			Board board = game.getBoard();
-			int x,y,imin,imax,jmin,jmax;
-			x=p.getX();
-			y=p.getY();
-			imin=Math.max(0, x-2);
-			imax=Math.min(x+2, Board.SIZE-1);
-			jmin=Math.max(0, y-2);
-			jmax=Math.min(y+2, Board.SIZE-1);
-			for(int i=imin; i<=imax; i++) {
-				for(int j=jmin; j<=jmax; j++) {
-					if(board.getBlob(i,j) == Blob.EMPTY) {
-						if(p.distanceTo(new Point(i,j))<2)
-							g.drawImage(cell_d1, j*BLOB_SIZE, i*BLOB_SIZE, BLOB_SIZE, BLOB_SIZE, null);
-						else
-							g.drawImage(cell_d2, j*BLOB_SIZE, i*BLOB_SIZE, BLOB_SIZE, BLOB_SIZE, null);
-						}
-				}
+			drawPosiblesMoves(g, p, D1.values(), cell_d1);
+			drawPosiblesMoves(g, p, D2.values(), cell_d2);
+		}
+		D1.values();
+	}
+			
+			
+	private void drawPosiblesMoves(Graphics g, Point p, Displacement[] dis, Image img){
+		int x=p.getX();
+		int y=p.getY();
+		Board board = game.getBoard();
+		for (Displacement d : dis) {
+			int r = x + d.getRow();
+			int c = y + d.getCol();;
+			if(board.contains(r,c) && board.getBlob(r,c) == Blob.EMPTY){
+				g.drawImage(img, c*BLOB_SIZE, r*BLOB_SIZE, BLOB_SIZE, BLOB_SIZE, null);
 			}
-//			for(int i=0;i<2;i++){
-//				for (Direction dir : Direction.values()) {
-//					r = x + dir.getRow();
-//					c = y + dir.getCol();
-//					if(board.getChip(r,c) == Chip.EMPTY){
-//						switch (i) {
-//							case 0:
-//									g.drawImage(cell_d1, c*CHIP_SIZE, r*CHIP_SIZE, CHIP_SIZE, CHIP_SIZE, null);
-//									break;
-//							case 1:
-//									g.drawImage(cell_d2, c*CHIP_SIZE, r*CHIP_SIZE, CHIP_SIZE, CHIP_SIZE, null);
-//							}
-//					}
-//				}
-//			}
 		}
 	}
+//			imin=Math.max(0, x-2);
+//			imax=Math.min(x+2, Board.SIZE-1);
+//			jmin=Math.max(0, y-2);
+//			jmax=Math.min(y+2, Board.SIZE-1);
+//			for(int i=imin; i<=imax; i++) {
+//				for(int j=jmin; j<=jmax; j++) {
+//					if(board.getBlob(i,j) == Blob.EMPTY) {
+//						if(p.distanceTo(new Point(i,j))<2)
+//							g.drawImage(cell_d1, j*BLOB_SIZE, i*BLOB_SIZE, BLOB_SIZE, BLOB_SIZE, null);
+//						else
+//							g.drawImage(cell_d2, j*BLOB_SIZE, i*BLOB_SIZE, BLOB_SIZE, BLOB_SIZE, null);
+//						}
+//				}
+//			}
+//		}
+//	}
 
 	public int getWidth(){
 		return boardIm.getWidth(null);

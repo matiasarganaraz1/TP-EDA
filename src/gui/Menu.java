@@ -1,9 +1,7 @@
 package gui;
 
 
-import game.BlobWars;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
