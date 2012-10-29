@@ -6,27 +6,39 @@ public enum D2 implements Displacement{
 	L_LU(-2,-1), L_RU(-2,1), L_UR(-1,2), L_DR(1,2), 
 	L_RD(2,1), L_LD(2,-1), L_DL(1,-2),L_UL(-1,-2);
 
-	private int row, col;
+	private int dx, dy;
 	
 	private D2(int row, int col){
-		this.row=row;
-		this.col=col;
+		this.dx=row;
+		this.dy=col;
 	}
 	public int getCol() {
-		return col;
+		return dy;
 	}
 	public int getRow() {
-		return row;
+		return dx;
 	}
 	@Override
-	public Movement getMovement(Point from) {
-		return new Movement(from, new Point(row + from.getX(), col + from.getY())){
+	public Movement getMovement(Point from, Blob blob) {
+		return new Movement(from, new Point(dx + from.getX(), dy + from.getY()), blob){
 
 			@Override
 			public boolean makeMovement(BlobWars game) {
 
-				return game.moveBlob(from, this.to.getX(), this.to.getY(), Blob.PLAYER2);
+				return game.moveBlob(from, to.getX(), to.getY(), Blob.PLAYER2);
 			}
+
+			@Override
+			public boolean canBeMade(Board board) {
+				return board.getBlob(to) == Blob.EMPTY;
+			}
+
+			@Override
+			public Board tryMovement(Board board) {
+				board.moveBlob(from, to.getX(), to.getY(), myBlob);
+				return board;
+			}
+
 
 		};
 	}

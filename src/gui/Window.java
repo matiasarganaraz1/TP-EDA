@@ -158,6 +158,7 @@ public class Window extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				Window.this.game.newGame();
+				status.setText(playerTurn);
 				repaint();
 			}
 		});

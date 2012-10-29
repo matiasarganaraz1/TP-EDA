@@ -73,30 +73,30 @@ public class Board implements Cloneable {
 //	}
 
 	public Board clone() {
-		Blob[][] clonedField = new Blob[SIZE][SIZE];
+		Blob[][] clonedBoard = new Blob[SIZE][SIZE];
 		for (int row = 0; row < SIZE; row++) {
 			for (int col = 0; col < SIZE; col++) {
-				clonedField[row][col] = board[row][col];
+				clonedBoard[row][col] = board[row][col];
 			}
 		}
-		return new Board(clonedField);
+		return new Board(clonedBoard);
 	}
 
-	public Blob[][] getField() {
+	public Blob[][] getBoard() {
 		return board;
 	}
 
-	@Override
-	public String toString() {
-		String s = "";
-		for (int i = 0; i < SIZE; i++) {
-			for (int j = 0; j < SIZE; j++) {
-				s += board[i][j];
-			}
-			s += "\n";
-		}
-		return s;
-	}
+//	@Override
+//	public String toString() {
+//		String s = "";
+//		for (int i = 0; i < SIZE; i++) {
+//			for (int j = 0; j < SIZE; j++) {
+//				s += board[i][j];
+//			}
+//			s += "\n";
+//		}
+//		return s;
+//	}
 
 	public boolean playerHasMoves() {
 		Displacement[][] displacements = {D1.values(), D2.values()};
@@ -162,7 +162,6 @@ public class Board implements Cloneable {
 	}
 
 	private void clearCell(Point position) {
-		System.out.println("clearCell  " + position);
 		board[position.getX()][position.getY()] = Blob.EMPTY;
 	}
 
@@ -173,6 +172,18 @@ public class Board implements Cloneable {
 
 	public boolean contains(int row, int col) {
 		return row >= 0 && row < SIZE && col >=0 && col < SIZE;
+	}
+	
+	@Override
+	public String toString() {
+		String s = "";
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				s += board[i][j];
+			}
+			s += "\n";
+		}
+		return s;
 	}
 
 }

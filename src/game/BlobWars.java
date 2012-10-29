@@ -2,7 +2,7 @@ package game;
 
 import java.util.Deque;
 import java.util.LinkedList;
-import ai.Ai;
+import ai.MiniMaxTree;
 
 
 //import AI.MiniMaxTree;
@@ -10,8 +10,8 @@ import ai.Ai;
 public class BlobWars {
 	private Board board;
 	private Deque<BoardState> undo;
-//	private boolean pruned, timed;
-//	private int level;
+	private boolean pruned, timed;
+	private int level;
 	private int blobsCount;
 	private GameListener listener;
 	private boolean playerCanMove;
@@ -21,9 +21,9 @@ public class BlobWars {
 
 	public BlobWars(GameListener listener,int level, boolean pruned, boolean timed){
 		this.listener=listener;
-//		this.timed=timed;
-//		this.pruned=pruned;
-//		this.level=level;
+		this.timed=timed;
+		this.pruned=pruned;
+		this.level=level;
 		newGame();
 	}
 
@@ -49,7 +49,8 @@ public class BlobWars {
 	}
 
 	public Movement computerSelectMovement() {
-		Movement movement = Ai.getNextMove(board);
+		MiniMaxTree tree = new MiniMaxTree(level, pruned, timed, 2, board);
+		Movement movement = tree.getNextMove();
 		if(movement == null){
 			endOfGame(Blob.PLAYER2);
 			return null;
@@ -68,6 +69,8 @@ public class BlobWars {
 			else
 				listener.enablePass();
 	}
+	
+	
 
 	//		MiniMaxTree tree = new MiniMaxTree(level, board, pruned, timed, false, MiniMaxTree.CPUTURN);
 	//		Position pos = tree.getNextMove();
@@ -101,11 +104,12 @@ public class BlobWars {
 				selectedBlob = aux;
 				return false;
 			}
-			undo.push(new BoardState(board.clone(),blobsCount));
-			listener.enableUndo();
 			double d = selectedBlob.distanceTo(new Point(row, col));
 			if(d > 0  &&  d < 2.9){
-				if(((d < 1.5) ? cloneBlob(row, col, Blob.PLAYER1) : board.moveBlob(selectedBlob, row, col, Blob.PLAYER1))){
+				BoardState bs = new BoardState(board.clone(), blobsCount);
+				if(((d < 1.5) ? board.cloneBlob(row, col, Blob.PLAYER1) : board.moveBlob(selectedBlob, row, col, Blob.PLAYER1))){
+					undo.push(bs);
+					listener.enableUndo();
 					selectedBlob=null;
 					playerTurn = false;
 					if(countBlobs(Blob.PLAYER2) == 0) {
@@ -117,17 +121,6 @@ public class BlobWars {
 			}
 		}
 		return false;
-	}
-
-	public boolean cloneBlob(int row, int col, Blob blob){
-		boolean b = board.cloneBlob(row, col, blob);
-		if(b)
-			blobsCount++;
-		return b;
-	}
-
-	public boolean moveBlob(Point from, int row, int col, Blob blob){
-		return board.moveBlob(from, row, col, blob);
 	}
 
 	public Board getBoard() {
@@ -144,6 +137,7 @@ public class BlobWars {
 		blobsCount = 4;
 		playerTurn=true;
 		playerCanMove=true;
+		selectedBlob = null;
 		hasEnded = false;
 	}
 
@@ -176,6 +170,21 @@ public class BlobWars {
 
 	public int blobsCount(){
 		return blobsCount;
+	}
+
+	public void increaseBlobCount() {
+		blobsCount++;
+	}
+
+	public boolean cloneBlob(int row, int col, Blob blob) {
+		boolean b = board.cloneBlob(row, col, blob);
+		if(b)
+			blobsCount++;
+		return b;
+	}
+
+	public boolean moveBlob(Point from, int row, int col, Blob blob) {
+		return board.moveBlob(from, row, col, blob);
 	}
 
 }

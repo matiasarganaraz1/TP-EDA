@@ -4,26 +4,36 @@ public enum D1 implements Displacement{
 	NORTH(-1, 0), NORTHEAST(-1,1), EAST(0,1), SOUTHEAST(1,1), 
 	SOUTH(1,0), SOUTHWEST(1,-1), WEST(0,-1), NORTHWEST(-1,-1);
 	
-	private int row, col;
+	private int dx, dy;
 	
 	private D1(int row, int col){
-		this.row=row;
-		this.col=col;
+		this.dx=row;
+		this.dy=col;
 	}
 	public int getCol() {
-		return col;
+		return dy;
 	}
 	public int getRow() {
-		return row;
+		return dx;
 	}
 	@Override
-	public Movement getMovement(Point from) {
-		return new Movement(from, new Point(row + from.getX(), col + from.getY())) {
+	public Movement getMovement(Point from, Blob blob) {
+		return new Movement(from, new Point(dx + from.getX(), dy + from.getY()), blob) {
 
 			@Override
 			public boolean makeMovement(BlobWars game) {
-
 				return game.cloneBlob(this.to.getX(), this.to.getY(), Blob.PLAYER2);
+			}
+
+			@Override
+			public boolean canBeMade(Board board) {
+				return board.getBlob(to) == Blob.EMPTY;
+			}
+
+			@Override
+			public Board tryMovement(Board board) {
+				board.cloneBlob(to.getX(), to.getY(), myBlob);
+				return board;
 			}
 
 		};

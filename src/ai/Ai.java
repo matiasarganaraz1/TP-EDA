@@ -24,7 +24,7 @@ public class Ai {
 							from=new Point(i,j);
 							to = new Point(i + d.getRow(), j + d.getCol());
 							if(board.contains(to) && board.getBlob(to) == Blob.EMPTY){
-								return d.getMovement(from);
+								return d.getMovement(from, Blob.PLAYER2);
 							}
 						}
 					}
