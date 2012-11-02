@@ -24,7 +24,7 @@ public class BoardParser {
 		String line;
 		char[] charLine;
 		while ((line = buffer.readLine()) != null) {
-			if (line.length() != Board.SIZE || i > Board.SIZE) {
+			if (line.length() != Board.SIZE || i >= Board.SIZE) {
 				throw new ParsingException();
 			}
 			charLine = line.toCharArray();
