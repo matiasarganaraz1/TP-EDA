@@ -8,10 +8,13 @@ import game.Movement;
 
 public class BlobWars {
 	public static void main(String[] args) {
-		new Window(1, true, false);
 		try {
 
 			ArgumentParser argParser = new ArgumentParser(args);
+			System.out.println("isVisual :"+argParser.isVisual());
+			System.out.println("level :"+argParser.getLevel());
+			System.out.println("isPruned :"+argParser.isPruned());
+			System.out.println("isTimed :"+argParser.isTimed());
 			if (argParser.isVisual()) {
 				new Window(argParser.getLevel(), argParser.isPruned(),
 						argParser.isTimed());
