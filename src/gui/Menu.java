@@ -32,6 +32,7 @@ public class Menu extends JMenuBar{
 			public void actionPerformed(ActionEvent e) {
 				Menu.this.window.getGame().newGame();
 				Menu.this.window.repaint();
+				Menu.this.window.setinitialStatus();
 			}
 
 			

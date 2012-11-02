@@ -1,22 +1,17 @@
 package ai;
 
-import game.Board;
-import game.Movement;
-import game.Blob;
-
-
 public class MinNode extends Node{
 
-	public MinNode(Board board, Blob blob, Movement mov){
+	public MinNode(AIBoard board, char blob, AIMovement movement){
 		this.board = board;
+		this.movement = movement;
 		value = Integer.MAX_VALUE;
-		this.movement = mov;
-		this.myBlob = blob;
+		myBlob = blob;
 	}
 
 	@Override
 	public boolean chooseMove(int val) {
-		return value>val;
+		return val < value;
 	}
 
 	@Override
@@ -27,13 +22,15 @@ public class MinNode extends Node{
 		return false;
 	}
 	
+
 	@Override
-	public Blob getOpositeBlob(){
-		return myBlob.getOpposite();
+	public void getValue(){
+		super.getValue();
+		value*=-1;
 	}
 	
 	@Override
-	public void addNewChild(Board board, Blob blob, Movement mov) {
-		childs.add(new MaxNode(board, blob, mov));
+	public Node createChild(AIBoard board, char blob, AIMovement movement) {
+		return new MaxNode(board, blob, movement);
 	}
 }

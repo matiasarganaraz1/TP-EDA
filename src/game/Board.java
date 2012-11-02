@@ -1,10 +1,10 @@
 package game;
 
-
-
 public class Board implements Cloneable {
 
 	public static final int SIZE = 8;
+
+	public int ROCK_COUNT=-1;
 
 	private Blob[][] board = new Blob[SIZE][SIZE];
 	
@@ -22,10 +22,19 @@ public class Board implements Cloneable {
 				board[i][j]=Blob.EMPTY;
 			}
 		}
+//		board[3][3] = board[3][4] = board[4][3] = board[4][4] = Blob.ROCK;
 		board[0][0] = board[Board.SIZE-1][0] = Blob.PLAYER1;
 		board[0][Board.SIZE-1] = board[Board.SIZE-1][Board.SIZE-1] = Blob.PLAYER2;
 	}
 	
+	public int rockCount() {
+		return ROCK_COUNT!=-1?ROCK_COUNT:countRocks();
+	}
+	
+	private int countRocks() {
+		return ROCK_COUNT = countBlobs(Blob.ROCK);
+	}
+
 	public Blob getBlob(int row, int col) {
 		return board[row][col];
 	}
@@ -47,30 +56,6 @@ public class Board implements Cloneable {
 		return count;
 	}
 	
-//	public Set<Point> getPossiblePositions(Chip chip) {
-//		int actualRow, actualCol;
-//		Set<Point> set = new HashSet<Point>();
-//		for (int row = 0; row < SIZE; row++) {
-//			for (int col = 0; col < SIZE; col++) {
-//				if (board[row][col] == chip.getOpposite()) {
-//					for (Direction dir : Direction.values()) {
-//						actualRow = row + dir.getRow();
-//						actualCol = col + dir.getCol();
-//						if (!(actualRow < 0 || actualCol < 0
-//								|| actualRow >= SIZE || actualCol >= SIZE)
-//								&& board[actualRow][actualCol] == Chip.EMPTY) {
-//							if (possibleChange(actualRow, actualCol, chip,
-//									dir.getOpposite())) {
-//								set.add(new Point(actualRow, actualCol));
-//							}
-//
-//						}
-//					}
-//				}
-//			}
-//		}
-//		return set;
-//	}
 
 	public Board clone() {
 		Blob[][] clonedBoard = new Blob[SIZE][SIZE];
@@ -86,18 +71,6 @@ public class Board implements Cloneable {
 		return board;
 	}
 
-//	@Override
-//	public String toString() {
-//		String s = "";
-//		for (int i = 0; i < SIZE; i++) {
-//			for (int j = 0; j < SIZE; j++) {
-//				s += board[i][j];
-//			}
-//			s += "\n";
-//		}
-//		return s;
-//	}
-
 	public boolean playerHasMoves() {
 		Displacement[][] displacements = {D1.values(), D2.values()};
 		for(int i=0; i < Board.SIZE; i++){
@@ -105,7 +78,7 @@ public class Board implements Cloneable {
 				if(board[i][j] == Blob.PLAYER1){
 					for(Displacement[] disps:displacements){
 						for(Displacement d: disps){
-							Point to = new Point(i + d.getRow(), j + d.getCol());
+							Point to = new Point(i + d.getDx(), j + d.getDy());
 							if(contains(to) && getBlob(to) == Blob.EMPTY)
 								return true;
 						}
@@ -129,9 +102,9 @@ public class Board implements Cloneable {
 		return false;
 	}
 
-	public boolean moveBlob(Point selectedBlob, int row, int col, Blob blob) {
+	public boolean moveBlob(Point from, int row, int col, Blob blob) {
 		if(cloneBlob(row, col, blob)){
-			clearCell(selectedBlob);
+			clearCell(from);
 			return true;
 		}
 		return false;

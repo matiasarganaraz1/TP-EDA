@@ -1,8 +1,11 @@
 package gui;
 import java.io.IOException;
 
-//import game.Board;
-//import game.Position;
+import ai.MiniMax;
+
+import game.Board;
+import game.Movement;
+;
 //import parsing.ArgumentParsing;
 //import parsing.BoardParser;
 //import parsing.ParsingException;
@@ -11,7 +14,17 @@ import java.io.IOException;
 
 public class BlobWars {
 	public static void main(String[] args) {
-		new Window(1,false,false);
+//		
+//		Board board = new Board();
+//		MiniMax minimax = new MiniMax(3, true, false, 2, board);
+//		Movement movement = minimax.getNextMove();
+//		if(movement == null)
+//			System.out.println("PASS");
+//		else
+//			System.out.println(movement);
+//			
+		
+		new Window(1,true,false);
 //		try{
 //			
 //			ArgumentParsing argParser = new ArgumentParsing(args);

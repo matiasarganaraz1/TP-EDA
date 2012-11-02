@@ -19,6 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+
+
 public class Window extends JFrame {
 	
 	/**
@@ -41,33 +43,19 @@ public class Window extends JFrame {
 				public void endOfGame(int playerCount, int computerCount) {
 					int score = playerCount - computerCount;
 					passButton.setEnabled(false);
-//					try {
-//						Thread.sleep(100);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
 					Window.this.repaint();
-
+					String sco = "Player:           Computer:\n    "+playerCount+"                      "+computerCount;
 						if(score<0){
-							JOptionPane.showMessageDialog(Window.this,"Perdiste");
+							JOptionPane.showMessageDialog(Window.this,"             Perdiste\n"+sco);
 							status.setText("Perdiste");
-//	                		JOptionPane.showMessageDialog(Window.this, null, "Perdiste", 0, new ImageIcon("./resources/YOULOOSE.png"));
 						}else if(score>0){
-							JOptionPane.showMessageDialog(Window.this,"Ganaste");
+							JOptionPane.showMessageDialog(Window.this,"             Ganaste\n"+sco);
 							status.setText("Ganaste");
-//							JOptionPane.showMessageDialog(Window.this, null, "Ganaste", 0, new ImageIcon("./resources/youWon.png"));
-//							
-//							panel.setPreferredSize(new Dimension(552,240));
 						}else{
-							JOptionPane.showMessageDialog(Window.this,"Empate");
+							JOptionPane.showMessageDialog(Window.this,"             Empate");
 							status.setText("Empate");
-//							panel = new ImageFrame(ImageUtils.loadImage("./resources/drawgame.png"));
-//							panel.setPreferredSize(new Dimension(425,352));
 						}
-						JOptionPane.showMessageDialog(Window.this,"Player:           Computer:\n    "+playerCount+"                      "+computerCount);
 						status.setText(null);
-//					Window.this.repaint();
 				}
 			
 				public void enablePass() {
@@ -90,6 +78,10 @@ public class Window extends JFrame {
 		initializeContent();
 		
 		
+	}
+	
+	public void setinitialStatus() {
+		status.setText(playerTurn);
 	}
 	
 	private void initializeContent(){
@@ -119,7 +111,7 @@ public class Window extends JFrame {
 		status=new JLabel(playerTurn);
 		
 		//undo
-		undoLabel = new JLabel("UNDO");
+		undoLabel = new JLabel("Undo");
 		undoLabel.setForeground(Color.DARK_GRAY);
 		undoLabel.setFont(new Font("Arial", Font.BOLD, 20));
 		undoButton = new JButton(new ImageIcon("./resources/button.png"));
@@ -137,6 +129,10 @@ public class Window extends JFrame {
 			}
 		});
 		
+		//pass
+		passLabel = new JLabel("Pass");
+		passLabel.setForeground(Color.DARK_GRAY);
+		passLabel.setFont(new Font("Arial", Font.BOLD, 20));
 		passButton = new JButton(new ImageIcon("./resources/button.png"));
 		passButton.setEnabled(false);
 		passButton.setOpaque(false);
@@ -150,6 +146,10 @@ public class Window extends JFrame {
 			}
 		});
 		
+		//new Game
+		newGameLabel = new JLabel("New Game");
+		newGameLabel.setForeground(Color.black);
+		newGameLabel.setFont(new Font("Arial", Font.BOLD, 18));
 		newGameButton = new JButton(new ImageIcon("./resources/button.png"));
 		newGameButton.setOpaque(false);
 		newGameButton.setBorderPainted(false);
@@ -167,18 +167,20 @@ public class Window extends JFrame {
 		info.add(undoLabel);
 		info.add(undoButton);
 		info.add(status);
+		info.add(passLabel);
 		info.add(passButton);
+		info.add(newGameLabel);
 		info.add(newGameButton);
 		container.paintImmediately(container.getBounds());
 		status.setBounds(5, 10, 150, 15);
-		newGameButton.setBounds(160, 0, 115, 35);
-		undoButton.setBounds(275,0,115,35);
-		undoLabel.setBounds(303, 1, 115, 35);
-		passButton.setBounds(390,0,115,35);
-//		status.setOpaque(true);
+		newGameButton.setBounds(160, 0, 115, 40);
+		newGameLabel.setBounds(170,4,115,35);
+		undoButton.setBounds(275,0,115,40);
+		undoLabel.setBounds(303, 4, 115, 35);
+		passButton.setBounds(390,0,115,40);
+		passLabel.setBounds(425, 4, 115, 35);
 		status.setForeground(Color.white);
-//		status.setBackground(new Color(100,100,100,124));
-		info.setBounds(31, 540, background.getWidth(), 30);
+		info.setBounds(31, 540, background.getWidth(), 45);
 		
 		background.add(info);
 		background.setBounds(0, 25, background.getWidth(), background.getHeight());
@@ -195,19 +197,22 @@ public class Window extends JFrame {
 	public void play(int row, int col){
 		if( !game.hasEnded() && game.playerTurn(row, col) && !game.hasEnded()) {
 			status.setText(computerTurn);
-			
-			Movement mov = game.computerSelectMovement();
 			container.paintImmediately(container.getBounds());
-			try {
-				Thread.sleep(700);
-			} catch (InterruptedException e) {
-				System.out.println("ERROR");
-			}
-			if(mov == null)
+			Movement mov = game.computerSelectMovement();
+			if(mov == null){
 				status.setText("Computer can't move and pass");
+				game.endOfGame(Blob.PLAYER2);
+			}
 			else {
+				container.paintImmediately(container.getBounds());
+				try {
+					Thread.sleep(700);
+				} catch (InterruptedException e) {
+					System.out.println("ERROR");
+				}
 				game.computerMakeMovement(mov);
-				status.setText(playerTurn);
+				if(!game.hasEnded())
+					status.setText(playerTurn);
 			}
 		}
 		container.paintImmediately(container.getBounds());
@@ -216,4 +221,5 @@ public class Window extends JFrame {
 	public BlobWars getGame() {
 		return game;
 	}
+
 }

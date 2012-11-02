@@ -2,7 +2,7 @@ package game;
 
 
 public enum Blob {
-	PLAYER1,PLAYER2, EMPTY;
+	PLAYER1,PLAYER2, EMPTY, ROCK;
 	
 	public Blob getOpposite(){
 		if(this==PLAYER1){
@@ -17,9 +17,11 @@ public enum Blob {
 	public String toString() {
 		switch (this){
 		case PLAYER1:
-			return"player1";
+			return"Player1";
 		case PLAYER2:
-			return "player2";
+			return "Player2";
+		case ROCK:
+			return "Rock";
 		default:
 			return "empty  ";
 		}

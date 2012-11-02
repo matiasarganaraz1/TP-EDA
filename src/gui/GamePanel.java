@@ -19,6 +19,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 
+
+
+
 public class GamePanel extends JPanel {
 	
 	/**
@@ -27,18 +30,19 @@ public class GamePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private BlobWars game;
 	private static final int BLOB_SIZE = 64;
-	private Image blackBlob, whiteBlob, selectedWhite, selectedBlack, boardIm, cell_d1, cell_d2;
+	private Image  boardIm, blackBlob, whiteBlob, selectedWhite, selectedBlack, rock, cell_d1, cell_d2;
 	private Window window;
 
 	public GamePanel(BlobWars game, Window window) {
 		try{
 			this.window=window;
 			this.game = game;
+			boardIm = ImageUtils.loadImage("./resources/board.png");
 			blackBlob = ImageUtils.loadImage("./resources/apple.png");
 			whiteBlob = ImageUtils.loadImage("./resources/android.png");
-			boardIm = ImageUtils.loadImage("./resources/board.png");
 			selectedWhite = ImageUtils.loadImage("./resources/lighted-android.png");
 			selectedBlack = ImageUtils.loadImage("./resources/lighted-apple.png");
+			rock = ImageUtils.loadImage("./resources/sleepy.png");
 			cell_d1 = ImageUtils.loadImage("./resources/cell-d1.png");
 			cell_d2 = ImageUtils.loadImage("./resources/cell-d2.png");
 		}catch(IOException e){
@@ -74,7 +78,6 @@ public class GamePanel extends JPanel {
 			drawPosiblesMoves(g, p, D1.values(), cell_d1);
 			drawPosiblesMoves(g, p, D2.values(), cell_d2);
 		}
-		D1.values();
 	}
 			
 			
@@ -83,8 +86,8 @@ public class GamePanel extends JPanel {
 		int y=p.getY();
 		Board board = game.getBoard();
 		for (Displacement d : dis) {
-			int r = x + d.getRow();
-			int c = y + d.getCol();;
+			int r = x + d.getDx();
+			int c = y + d.getDy();;
 			if(board.contains(r,c) && board.getBlob(r,c) == Blob.EMPTY){
 				g.drawImage(img, c*BLOB_SIZE, r*BLOB_SIZE, BLOB_SIZE, BLOB_SIZE, null);
 			}
@@ -123,8 +126,10 @@ public class GamePanel extends JPanel {
 				Blob blob = board.getBlob(row, col);
 				if (blob == Blob.PLAYER1) {
 					g.drawImage(whiteBlob,col*BLOB_SIZE,row*BLOB_SIZE,BLOB_SIZE,BLOB_SIZE,null);
-				} else if (blob == Blob.PLAYER2) {
+				}	else if (blob == Blob.PLAYER2) {
 					g.drawImage(blackBlob,col*BLOB_SIZE,row*BLOB_SIZE,BLOB_SIZE,BLOB_SIZE,null);
+				}	else if(blob == Blob.ROCK) {
+					g.drawImage(rock,col*BLOB_SIZE,row*BLOB_SIZE,BLOB_SIZE,BLOB_SIZE,null);
 				}
 			}
 		}

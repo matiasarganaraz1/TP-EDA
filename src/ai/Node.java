@@ -2,51 +2,59 @@ package ai;
 
 import game.*;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Node{
 
-	protected List<Node> childs=new LinkedList<Node>();
-	protected Board board;
-	protected Movement movement;
+	protected AIBoard board;
+	protected AIMovement movement;
 	protected int value;
-	protected Blob myBlob;
+	protected char myBlob;
 
+	
 	public abstract boolean chooseMove(int val);
 	public abstract boolean pruneBranch(Integer val);
-	public abstract Blob getOpositeBlob();
-	public abstract void addNewChild(Board board,  Blob Blob, Movement mov);
+	public abstract Node createChild(AIBoard board,  char Blob, AIMovement movement);
 
 
-	//Falta este tambien.
-	public int getHeuristicalValue(){
-		return 2;
 	
+	public char getOppositeBlob(){
+		return AIBoard.getOppositeBlob(myBlob);
+	}
+	
+	public void getValue(){
+		value=0;
+		for(int i=0; i<Board.SIZE; i++){
+			for(int j=0; j<Board.SIZE; j++){
+				char blob = board.getBlob(i, j);
+				value+= blob == myBlob?1:blob==getOppositeBlob()?-1:0;
+			}
+		}
 	}
 
 
 
-	public Movement nextMove(int maxLevel, long level, boolean prune, Integer parentVal, TimeWatcher timeWatcher){
+	public AIMovement nextMove(int maxLevel, long level, boolean prune, Integer parentVal, TimeWatcher timeWatcher){
 		if(timeWatcher!=null){
 			timeWatcher.checkTime();
+			if(timeWatcher.timeFinished())
+				return null;
 		}
+		
+		
 		if(maxLevel==level){ 
-			getHeuristicalValue();
+			getValue();
 			return movement;
 		}
-		Movement ans = movement;
-		level++;
-		
-		//revisar. yo lo hice asi, pero si vamos a usar lo que vos hiciste 
-		//habria que adaptarlo. es un toque igual
-		setChilds();
-		for(Node child:childs){
-			if(prune && pruneBranch(parentVal)){
+		AIMovement ans = movement;
+		for(Node child:childs()){
+			if(prune && pruneBranch(parentVal))
 				return null;
-			}
+			
+			child.nextMove(maxLevel, level+1, prune, value, timeWatcher);
 			if(child.chooseMove(value)){
-				child.nextMove(maxLevel, level, prune, value, timeWatcher);
 				ans=child.movement;
 				value=child.value;
 			}
@@ -54,30 +62,30 @@ public abstract class Node{
 		return ans;
 	}
 
-	public void setChilds(){	
-		/**  aca iria lo tuyo.para probar
-		 *** las dos alternativas, pero hacer que sea menos pesada esta,
-		 *** puse a los displacements en la clase tree. asi estan cargados una sola vez en memoria
-		*/ 
-		
-		Displacement[][] displacements = MiniMaxTree.getDisplacements();
-		for(Displacement[] disps : displacements){
-			for(int i=0; i < Board.SIZE; i++){
-				for(int j=0; j<Board.SIZE;j++){
+	public List<Node> childs(){
+		HashSet<AIMovement> movements = new HashSet<AIMovement>();
+		List<Node> ans = new LinkedList<Node>();
+		Displacement[][] displacements = MiniMax.getDisplacements();
+		for(Displacement[] disps : displacements)
+			for(int i=0; i < Board.SIZE; i++)
+				for(int j=0; j<Board.SIZE;j++)
 					for(Displacement d: disps){
 						if(board.getBlob(i, j) == myBlob){
 							Point from,to;
 							from=new Point(i,j);
-							to = new Point(i + d.getRow(), j + d.getCol());
-							if(board.contains(to) && board.getBlob(to) == Blob.EMPTY){
-								Movement movement = d.getMovement(from, myBlob);
-								Board cBoard = board.clone();
-								addNewChild(movement.tryMovement(cBoard), myBlob.getOpposite(), movement);
+							to = new Point(i + d.getDx(), j + d.getDy());
+							if(board.contains(to) && board.getBlob(to) == 'e'){
+								AIMovement movement = d.getMovement(from);
+								
+								if(!movement.check() || !movements.contains(movement)){
+									MiniMax.iterations++;
+									movements.add(movement);
+									ans.add(createChild(movement.makeMovement(board, myBlob), getOppositeBlob(), movement));
+								}
 							}
 						}
 					}
-				}
-			}
-		}
+		
+		return ans;
 	}
 }

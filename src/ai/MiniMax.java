@@ -1,29 +1,26 @@
 package ai;
 
 import game.Board;
-import game.D1;
-import game.D2;
-import game.Displacement;
-import game.Movement;
 import game.Blob;
+import game.Movement;
 
-public class MiniMaxTree {
+public class MiniMax {
 
 	public static int PLAYERTURN=1, COMPUTERTURN=2;
 	private Node root;
 	private int limit;
 	private boolean prune, timed;
-	private Blob blob;
-	private Board board;
+	private char blob;
+	private AIBoard board;
+	public static int iterations;
 	public static Displacement[][] displacements = {D1.values(), D2.values()};
 
-	public MiniMaxTree(int limit, boolean prune, boolean timed, int player, Board board) {
+	public MiniMax(int limit, boolean prune, boolean timed, int player, Board board) {
 		this.limit=limit;
 		this.prune = prune;
 		this.timed=timed;
-		blob = player == COMPUTERTURN ? Blob.PLAYER2 : Blob.PLAYER1;
-		root = new MaxNode(board, blob, null);
-		this.board=board;
+		blob = AIBoard.convertBlob(player == COMPUTERTURN ? Blob.PLAYER2 : Blob.PLAYER1);
+		this.board = new AIBoard(board);
 	}
 	
 	public static Displacement[][] getDisplacements(){
@@ -31,13 +28,18 @@ public class MiniMaxTree {
 	}
 	
 	public Movement getNextMove(){
-		return timed?getNextMoveByTime() : getNextMoveByLevel(limit, null);
+		Movement aux= timed?getNextMoveByTime() : getNextMoveByLevel(limit, null);
+		System.out.println("Iteraciones: "+iterations);
+		iterations=0;
+		return aux;
 	}
 	
 	private Movement getNextMoveByLevel(int limit, TimeWatcher timeWatcher){
 		root = new MaxNode(board, blob, null);
-		Movement ans = root.nextMove(limit, 0, prune, null, timeWatcher);
-		return ans;
+		iterations = 0;
+		AIMovement aux = root.nextMove(limit, 0, prune, null, timeWatcher);
+		return aux!=null?aux.getMovement():null;
+		
 	}
 	
 	
@@ -51,13 +53,20 @@ public class MiniMaxTree {
 	private Movement getNextMoveByTime(){
 		Movement tryingMov=null, currentAns=null;
 		TimeWatcher timeWatcher=new TimeWatcher(limit);
-		int level=1;
+		int level=2;
 		while(!timeWatcher.timeFinished()){
-			currentAns=tryingMov;
+//			if(tryingMov!=null)
+				currentAns=tryingMov;
 			tryingMov=getNextMoveByLevel(level, timeWatcher);
+			System.out.println("Current "+currentAns);
+			System.out.println("Level: "+level);
 			level++;				
 		}
 		return currentAns;
+	}
+	
+	public int getIterations(){
+		return iterations;
 	}
 	
 }

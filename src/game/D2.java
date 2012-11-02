@@ -1,5 +1,7 @@
 package game;
 
+
+
 public enum D2 implements Displacement{
 	DNORTH(-2, 0), DNORTHEAST(-2,2), DEAST(0,2), DSOUTHEAST(2,2), 
 	DSOUTH(2,0), DSOUTHWEST(2,-2), DWEST(0,-2), DNORTHWEST(-2,-2),
@@ -8,38 +10,16 @@ public enum D2 implements Displacement{
 
 	private int dx, dy;
 	
-	private D2(int row, int col){
-		this.dx=row;
-		this.dy=col;
+	private D2(int dx, int dy){
+		this.dx=dx;
+		this.dy=dy;
 	}
-	public int getCol() {
-		return dy;
-	}
-	public int getRow() {
+	
+	public int getDx() {
 		return dx;
 	}
-	@Override
-	public Movement getMovement(Point from, Blob blob) {
-		return new Movement(from, new Point(dx + from.getX(), dy + from.getY()), blob){
-
-			@Override
-			public boolean makeMovement(BlobWars game) {
-
-				return game.moveBlob(from, to.getX(), to.getY(), Blob.PLAYER2);
-			}
-
-			@Override
-			public boolean canBeMade(Board board) {
-				return board.getBlob(to) == Blob.EMPTY;
-			}
-
-			@Override
-			public Board tryMovement(Board board) {
-				board.moveBlob(from, to.getX(), to.getY(), myBlob);
-				return board;
-			}
-
-
-		};
+	
+	public int getDy() {
+		return dy;
 	}
 }

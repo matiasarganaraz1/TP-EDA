@@ -14,8 +14,11 @@ public class TimeWatcher {
 	}
 
 	public void checkTime(){
+//		System.out.println("CheckTime");
 		if(++currentIteration%WATCH_ITERATIONS==0){
+//			System.out.println("100");
 			if(System.currentTimeMillis()-initialTime>=maxTime){
+				System.out.println("finished");
 				timeFinished = true;
 			}
 		}

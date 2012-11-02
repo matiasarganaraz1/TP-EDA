@@ -2,7 +2,7 @@ package game;
 
 import java.util.Deque;
 import java.util.LinkedList;
-import ai.MiniMaxTree;
+import ai.MiniMax;
 
 
 //import AI.MiniMaxTree;
@@ -49,25 +49,26 @@ public class BlobWars {
 	}
 
 	public Movement computerSelectMovement() {
-		MiniMaxTree tree = new MiniMaxTree(level, pruned, timed, 2, board);
-		Movement movement = tree.getNextMove();
-		if(movement == null){
-			endOfGame(Blob.PLAYER2);
+		MiniMax minimax = new MiniMax(level, pruned, timed, 2, board);
+		Movement movement = minimax.getNextMove();
+		if(movement == null)
 			return null;
-		}
-		selectedBlob = movement.from;
+		selectedBlob = movement.getFrom();
 		return movement;
 	}
 
 	public void computerMakeMovement(Movement movement){
-		movement.makeMovement(this);
+		movement.makeMovement(this, Blob.PLAYER2);
 		selectedBlob = null;
 		playerTurn=true;
-		if(!playerHasMoves())
-			if(countBlobs(Blob.PLAYER1)==0 || blobsCount() == Board.SIZE*Board.SIZE)
+		if(!playerHasMoves()){
+			if(countBlobs(Blob.PLAYER1)==0 || blobsCount == Board.SIZE*Board.SIZE-board.rockCount()) {
+				hasEnded = true;
 				endOfGame();
+			}
 			else
 				listener.enablePass();
+		}
 	}
 	
 	
@@ -107,7 +108,7 @@ public class BlobWars {
 			double d = selectedBlob.distanceTo(new Point(row, col));
 			if(d > 0  &&  d < 2.9){
 				BoardState bs = new BoardState(board.clone(), blobsCount);
-				if(((d < 1.5) ? board.cloneBlob(row, col, Blob.PLAYER1) : board.moveBlob(selectedBlob, row, col, Blob.PLAYER1))){
+				if(((d < 1.5) ? cloneBlob(row, col, Blob.PLAYER1) : moveBlob(selectedBlob, row, col, Blob.PLAYER1))){
 					undo.push(bs);
 					listener.enableUndo();
 					selectedBlob=null;

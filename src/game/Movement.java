@@ -1,19 +1,17 @@
 package game;
 
+
+
 public abstract class Movement {
 
 	protected Point from, to;
-	protected Blob myBlob;
 	
-	public Movement(Point from, Point to, Blob blob){
+	public Movement(Point from, Point to){
 		this.from = from;
 		this.to = to;
-		myBlob = blob;
 	}
 	
-	public abstract boolean makeMovement(BlobWars game);
-	public abstract boolean canBeMade(Board board);
-	public abstract Board tryMovement(Board board);
+	public abstract boolean makeMovement(BlobWars game, Blob blob);
 	
 	public Point getFrom(){
 		return from;
@@ -21,5 +19,10 @@ public abstract class Movement {
 	
 	public Point getTo(){
 		return to;
+	}
+	
+	@Override
+	public String toString(){
+		return "blob from "+from+" to "+to; 
 	}
 }
